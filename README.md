@@ -17,7 +17,7 @@ Content
 =======
 Here are some roles to demonstrate how to interact with OTC-API.
 ECS-API is origin developed by Huawei and described here:
-http://support.hwclouds.com/en-us/api/ecs/en-us_topic_0020805967.html
+https://docs.otc.t-systems.com/api/ecs/index.html
 
 Roles
 =====
