@@ -1,4 +1,4 @@
-- include_vars: secrets.yml
+- include_vars: _secrets.yml
 
 - name: Request token from AUTH API
   uri:
@@ -8,7 +8,7 @@
     follow_redirects: all
     status_code: 201
     return_content: yes 
-    validate_certs: no
+    validate_certs: yes
     HEADER_Content-Type: "application/json"
     body: "{{ lookup('template', 'roles/token/templates/request.json.j2',convert_data=True)|to_json }}" 
   register: token

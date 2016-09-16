@@ -1,4 +1,4 @@
-- include_vars: vm_secrets.yml
+- include_vars: _ecs_secrets.yml
 
 - name: Send request to API
   uri:
@@ -7,12 +7,12 @@
     body_format: raw
     follow_redirects: all
     return_content: yes 
-    validate_certs: no
+    validate_certs: yes
     HEADER_Content-Type: "application/json"
     HEADER_X-Auth-Token: "{{ token['x_subject_token'] }}"
-    body: "{{ lookup('template', 'roles/vm/templates/request.json.j2')|to_json }}" 
-  register: vm
+    body: "{{ lookup('template', 'roles/ecs_create/templates/request.json.j2')|to_json }}" 
+  register: ecs
 
 - debug:
-    msg: "{{ vm }}"
+    msg: "{{ ecs }}"
 

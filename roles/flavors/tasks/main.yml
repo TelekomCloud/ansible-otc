@@ -3,7 +3,7 @@
     url: "{{ AUTH_URL_FLAVORS }}"
     method: GET
     return_content: yes 
-    validate_certs: no
+    validate_certs: yes
     HEADER_Content-Type: "application/json"
     HEADER_X-Auth-Token: "{{ token['x_subject_token'] }}"
   register: flavorlist
