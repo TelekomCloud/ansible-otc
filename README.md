@@ -10,6 +10,9 @@ Open Telekom Cloud (OTC). The service includes
 * Elastic Cloud Server (ECS)
 * Elastic Load Balancer (ELB)
 * Elastic Volume Service (EVS)
+* Image Management Service (IMS)
+* Object Storage Service (OBS)
+* Dynamic Name Service (DNS)
 and other useful things. The portfolio will rapidly developed.
 
 
@@ -46,15 +49,30 @@ Roles
 |flavors                | show flavors|
 |floatingip             | show floating ip-addresses|
 |images                 | show images|
+|image_create           | create an image from obs|
+|image_delete           | delete an image |
 |job                    | show job status|
 |keypairs               | show keypairs|
+|s3                     | show s3 buckets|
+|s3_bucket_create       | create s3 bucket|
+|s3_bucket_delete       | delete s3 bucket|
+|s3_upload              | upload files in s3 object store|
 |secgroups              | show security groups|
 |subnet                 | show subnet|
 |token                  | get auth token|
 |vpc                    | show vpc|
+|zones                  | show DNS zones|
+|zonerecords            | show DNS zonerecords|
+|zone_create            | create DNS zone|
+|zone_delete            | delete DNS zone|
+|zonerecord_create      | create DNS zonerecord|
+|zonerecord_delete      | delete DNS zonerecord|
 
 Requirements
 ============
+* curl
+* openssl
+* base64
 * Ansible >=2.0.1.0
 
   *Ubuntu 12.04/14.04/16.04:*
@@ -78,7 +96,7 @@ Requirements
       
 (should work on all other *nix systems)
 
-* :exclamation: credentials on OTC (username, projectid, generated API key)
+* :exclamation: credentials on OTC (username, projectid, generated API key, S3 access/secret key)
 
 Files
 =====
@@ -211,6 +229,10 @@ show images
 
     ansible-playbook -i hosts images.yml --vault-password-file vaultpass.txt
 
+delete an image (API return code is 204 when success, ansible expected 200 and may give an error)
+
+     ansible-playbook -i hosts -e "image_id=af0a0bcf-7be3-4722-98ba-3350801a8cd5" image_delete.yml  --vault-password-file vaultpass.txt
+
 show job status
 
     ansible-playbook -e "job_id=2c9eb2c15693b00901571e32ad5e1755" -i hosts job.yml --vault-password-file vaultpass.txt
@@ -220,6 +242,22 @@ show job status
 show keypairs
 
     ansible-playbook -i hosts keypairs.yml --vault-password-file vaultpass.txt
+
+show s3 buckets
+
+    ansible-playbook -i hosts s3.yml --vault-password-file vaultpass.txt
+
+create s3 bucket
+
+    ansible-playbook -i hosts -e "bucket=mybucket"  s3_bucket_create.yml  --vault-password-file vaultpass.txt
+
+delete s3 bucket
+
+    ansible-playbook -i hosts -e "bucket=mybucket"  s3_bucket_delete.yml  --vault-password-file vaultpass.txt
+
+upload files in s3 object store (VHD, ZVHD, VMDK, QCOW2 are supported for otc image service)
+
+    ansible-playbook -i hosts -e "bucket=mybucket" -e "object=xenial-server-cloudimg-amd64-disk1.vmdk"  s3_upload.yml  --vault-password-file vaultpass.txt
 
 show security groups
 
@@ -232,6 +270,43 @@ show subnets
 show vpc
 
     ansible-playbook -i hosts vpc.yml --vault-password-file vaultpass.txt
+
+show DNS zones
+
+    ansible-playbook -i hosts  zones.yml --vault-password-file vaultpass.txt
+
+create DNS zone (name and ttl are mandatory)
+
+    ansible-playbook -i hosts -e "zone_name=example.com." -e "zone_description=example zone" -e "zone_email=example@example.com" -e "zone_ttl=86400" zone_create.yml --vault-password-file vaultpass.txt
+
+delete DNS zone
+
+    ansible-playbook -i hosts -e "zoneid=ff80808257e2bb5e0157ec5ca2620234" zone_delete.yml --vault-password-file vaultpass.txt
+
+show DNS zone records
+
+    ansible-playbook -i hosts  zonerecords.yml --vault-password-file vaultpass.txt
+
+create DNS zonerecord (A-Record) possible values A,AAAA,MX,CNAME,PTR,TXT,NS
+
+    ansible-playbook -i hosts -e "zoneid=ff80808257e2bb5e0157ec620968023a" -e "zonerecord_name=testserver.example.com." -e "zonerecord_type=A" -e "zonerecord_value=160.44.196.210" -e "zonerecord_ttl=86400" zonerecord_create.yml --vault-password-file vaultpass.txt
+
+create DNS zonerecord (PTR-Record)
+
+    first create reverse zone:
+
+    ansible-playbook -i hosts -e "zone_name=210.196.44.160.in-addr.arpa." -e "zone_description=reverse  zone 160.44.196.210" -e "zone_email=test@example.com" -e "zone_ttl=300" zone_create.yml --vault-password-file vaultpass.txt
+
+    then create PTR-Record:
+    
+    ansible-playbook -i hosts -e "zoneid=ff80808257e2bb5e0157ec8911e60240" -e "zonerecord_name=210.196.44.160.in-addr.arpa." -e "zonerecord_type=PTR" -e "zonerecord_value=testserver.example.com" -e "zonerecord_ttl=300" zonerecord_create.yml --vault-password-file vaultpass.txt
+
+    beware of "." in the end of name and name convention of the PTR zones
+
+delete DNS zonerecord 
+
+    ansible-playbook -i hosts -e "zoneid=ff80808257e2bb5e0157ec620968023a" -e "zonerecordid=ff80808257e2bb050157ec789b5e027e"  zonerecord_delete.yml --vault-password-file vaultpass.txt
+
 
 Contributing
 ------------

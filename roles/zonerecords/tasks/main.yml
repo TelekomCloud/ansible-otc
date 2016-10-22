@@ -1,13 +1,12 @@
-- name: Request images list from  API
+- name: Request zonerecords  from  API
   uri:
-    url: "{{ AUTH_URL_CLOUDIMAGES }}"
+    url: "{{ AUTH_URL_DNS }}/recordsets"
     method: GET
     return_content: yes 
     validate_certs: yes
     HEADER_Content-Type: "application/json"
     HEADER_X-Auth-Token: "{{ token['x_subject_token'] }}"
-  register: imageslist
+  register: zonerecords
 
-- debug:
-    msg: "{{ imageslist.json }}"
-
+- debug: var=zonerecords.json
+  when: zonerecords is defined
