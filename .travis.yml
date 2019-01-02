@@ -1,0 +1,20 @@
+---
+dist: xenial
+
+language: python
+python:
+  - "2.7"
+  - "3.5"
+
+branches:
+  only:
+    - master
+    - dev
+    - galaxy
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y tox make latexmk texlive-latex-recommended texlive-fonts-recommended texlive-latex-extra
+
+script:
+  - tox
